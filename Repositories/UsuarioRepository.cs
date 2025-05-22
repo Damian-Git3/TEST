@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Connections;
+using TEST.DTOS;
 using TEST.Models;
 using TEST.Shared;
 
@@ -21,13 +22,23 @@ namespace TEST.Repositories
             return connection.QueryFirstOrDefault<Usuario>(sql, new { Correo = correo });
         }
 
-        public void Insertar(Usuario usuario)
+        public int Insertar(UsuarioRegisterDTO usuario)
         {
             using var connection = _dbConecction.GetOpenConnection();
-            string sql = @"
-            INSERT INTO Usuarios (Nombre, Correo, Contraseña, IdPerfil)
-            VALUES (@Nombre, @Correo, @Contraseña, @IdPerfil)";
-            connection.Execute(sql, usuario);
+            string sql = "sp_RegistrarUsuario";
+            var id = connection.QueryFirstOrDefault<int>(
+                sql,
+                new
+                {
+                    Nombre = usuario.Nombre,
+                    Correo = usuario.Correo,
+                    Contraseña = usuario.Contraseña,
+                    IdPerfil = usuario.IdPerfil
+                },
+                commandType: System.Data.CommandType.StoredProcedure
+            );
+            return id;
         }
+
     }
 }
