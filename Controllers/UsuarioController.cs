@@ -60,8 +60,6 @@ namespace TEST.Controllers
                 return StatusCode(500, "Error de configuración del servidor.");
             }
 
-            // Aquí puedes generar un token JWT y devolverlo al cliente
-
             var token = JWT.GenerarToken(usuario.IdUsuario.ToString(), Environment.GetEnvironmentVariable("SECRET_WORD"));
 
             return Ok(new
