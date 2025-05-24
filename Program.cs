@@ -1,12 +1,10 @@
-using System.Data.Common;
-using Microsoft.Data.SqlClient; // Import the appropriate namespace for your database provider
 using DotNetEnv;
-using TEST.Repositories;
-using TEST.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
+using System.Text;
+using TEST.Repositories;
+using TEST.Shared;
 
 /* CARGA DE VARIABLES DE ENTORNO */
 Env.Load();
@@ -53,6 +51,15 @@ builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<PerfilRepository>();
 builder.Services.AddScoped<ProductoRepository>();
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirTodos", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -94,7 +101,7 @@ builder.Services.AddControllers(options =>
 
 var app = builder.Build();
 
-
+app.UseCors("PermitirTodos");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

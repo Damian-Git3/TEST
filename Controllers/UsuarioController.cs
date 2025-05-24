@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TEST.DTOS;
 using TEST.Repositories;
@@ -34,22 +34,22 @@ namespace TEST.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login(string correo, string contrasenia)
+        public IActionResult Login(LoginDTO data)
         {
 
-            if (string.IsNullOrWhiteSpace(correo) || string.IsNullOrWhiteSpace(contrasenia))
+            if (string.IsNullOrWhiteSpace(data.Correo) || string.IsNullOrWhiteSpace(data.Contrasenia))
             {
                 return BadRequest("Correo y contraseña son obligatorios.");
             }
 
-            var usuario = _repo.ObtenerPorCorreo(correo);
+            var usuario = _repo.ObtenerPorCorreo(data.Correo);
 
             if (usuario == null)
             {
                 return NotFound("Usuario no encontrado.");
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(contrasenia, usuario.Contraseña))
+            if (!BCrypt.Net.BCrypt.Verify(data.Contrasenia, usuario.Contraseña))
             {
                 return Unauthorized("Contraseña incorrecta.");
             }
@@ -72,10 +72,24 @@ namespace TEST.Controllers
                     usuario.IdUsuario,
                     usuario.Nombre,
                     usuario.Correo,
-                    usuario.IdPerfil
+                    usuario.Perfil
                 }
             });
 
+        }
+
+        [Authorize]
+        [HttpGet("listar")]
+        public IActionResult Listar()
+        {
+            var usuarios = _repo.Listar();
+
+            if (usuarios == null || !usuarios.Any())
+            {
+                return NotFound("No se encontraron usuarios.");
+            }
+
+            return Ok(usuarios);
         }
     }
 }

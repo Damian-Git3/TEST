@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TEST.DTOS;
 using TEST.Repositories;
 
 namespace TEST.Controllers
 {
-    
+    [Authorize]
     [ApiController]
     [Route("producto")]
     public class ProductoController : Controller

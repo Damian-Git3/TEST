@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TEST.DTOS;
 
 namespace TEST.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("pedido")]
     public class PedidoController : Controller
@@ -10,8 +12,9 @@ namespace TEST.Controllers
 
         [HttpPost]
         [Route("insertar")]
-        public IActionResult CrearPedido([FromBody] PedidoDTO data) {
-           
+        public IActionResult CrearPedido([FromBody] PedidoDTO data)
+        {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

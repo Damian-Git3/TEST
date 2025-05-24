@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Microsoft.AspNetCore.Connections;
 using TEST.DTOS;
 using TEST.Models;
 using TEST.Shared;
@@ -18,8 +17,21 @@ namespace TEST.Repositories
         public Usuario? ObtenerPorCorreo(string correo)
         {
             using var connection = _dbConecction.GetOpenConnection();
-            string sql = @"SELECT * FROM Usuarios WHERE Correo = @Correo";
-            return connection.QueryFirstOrDefault<Usuario>(sql, new { Correo = correo });
+            string sql = @"
+                SELECT u.*, p.IdPerfil, p.NombrePerfil
+                FROM Usuarios u
+                INNER JOIN Perfiles p ON u.IdPerfil = p.IdPerfil
+                WHERE u.Correo = @Correo";
+            return connection.Query<Usuario, Perfil, Usuario>(
+                sql,
+                (usuario, perfil) =>
+                {
+                    usuario.Perfil = perfil;
+                    return usuario;
+                },
+                new { Correo = correo },
+                splitOn: "IdPerfil"
+            ).FirstOrDefault();
         }
 
         public int Insertar(UsuarioRegisterDTO usuario)
@@ -40,5 +52,11 @@ namespace TEST.Repositories
             return id;
         }
 
+        public List<UsuarioDTO> Listar()
+        {
+            using var connection = _dbConecction.GetOpenConnection();
+            string sql = @"SELECT IdUsuario, Nombre, Correo, IdPerfil, Activo, FechaCreacion FROM Usuarios";
+            return connection.Query<UsuarioDTO>(sql).ToList();
+        }
     }
 }
